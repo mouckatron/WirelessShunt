@@ -1,0 +1,3 @@
+[submodule "pyb_ina219"]
+	path = pyb_ina219
+	url = https://github.com/chrisb2/pyb_ina219.git

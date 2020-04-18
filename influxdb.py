@@ -1,41 +1,33 @@
-import socket
+from httpclient import http_post
 import json
+import _thread
+import time
 
 settings = None
 with open('influxdb.json') as f:
     settings = json.loads(f.read())
 
 
-def send_to_influxdb(ina):
+def create_dbs():
+    for c in settings['connections']:
+        http_post('http://%s:%s/query' % (c['host'], c['port']),
+                  ['q=CREATE DATABASE %s' % c['db']])
 
-    http_post('http://%s:%s/write?db=%s' % (settings['host'], settings['port'], settings['db']),
-              [
+
+def send_to_influxdb(ina):
+    for c in settings['connections']:
+        http_post('http://%s:%s/write?db=%s' % (c['host'], c['port'], c['db']), [
                 "bus_voltage,host=solarshunt value=%.3f" % ina.voltage(),
                 "current,host=solarshunt value=%.3f" % ina.current(),
                 "power,host=solarshunt value=%.3f" % ina.power()
               ])
 
 
-def http_post(url, data_lines):
-    _, _, host, path = url.split('/', 3)
-    addr = socket.getaddrinfo(host, 8086)[0][-1]
-    s = socket.socket()
-    s.connect(addr)
+def start(ina):
+    create_dbs()
 
-    head = [
-        'POST /%s HTTP/1.1' % path,
-        'Host: %s:8086' % host,
-        'User-Agent: MicroPython',
-        'Accept: *',
-        'Content-Length: %s' % len("\n".join(data_lines)),
-        'Content-Type: application/x-www-form-urlencoded',
-        '', ''
-        ]
-
-    s.send(bytes("\r\n".join(head) + "\n".join(data_lines), 'utf8'))
-
-    data = s.recv(1024)
-    if data:
-        print(str(data, 'utf8'))
-
-    s.close()
+    def t(ina):
+        while True:
+            send_to_influxdb(ina)
+            time.sleep(1)
+    _thread.start_new_thread(t, (ina,))

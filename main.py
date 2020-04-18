@@ -4,8 +4,9 @@ from machine import Pin, I2C
 from logging import INFO
 from ina219 import INA219
 import webserver
-from influxdb import send_to_influxdb
+import influxdb
 import time
+import _thread
 
 SHUNT_OHMS = 0.05
 
@@ -16,11 +17,15 @@ ina.configure()
 
 # webserver.start(ina)
 
-while True:
-    print("Bus Voltage: %.3f V" % ina.voltage())
-    print("Current: %.3f mA" % ina.current())
-    print("Power: %.3f mW" % ina.power())
+influxdb.create_dbs()
+influxdb.start(ina)
 
-    send_to_influxdb(ina)
 
-    time.sleep(1)
+def console_out(ina):
+    while True:
+        print("%.3fV %.3fmA %.3fmW" %
+              (ina.voltage(), ina.current(), ina.power()))
+        time.sleep(1)
+
+
+_thread.start_new_thread(console_out, (ina,))

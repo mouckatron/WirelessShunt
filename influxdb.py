@@ -17,9 +17,9 @@ def create_dbs():
 def send_to_influxdb(ina):
     for c in settings['connections']:
         http_post('http://%s:%s/write?db=%s' % (c['host'], c['port'], c['db']), [
-                "bus_voltage,host=solarshunt value=%.3f" % ina.voltage(),
-                "current,host=solarshunt value=%.3f" % ina.current(),
-                "power,host=solarshunt value=%.3f" % ina.power()
+                "bus_voltage,host=%s value=%.3f" % (settings['host'], ina.voltage()),
+                "current,host=%s value=%.3f" % (settings['host'], ina.current()),
+                "power,host=%s value=%.3f" % (settings['host'], ina.power())
               ])
 
 

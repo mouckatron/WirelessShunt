@@ -1,10 +1,17 @@
 import socket
+import time
+
+addrinfocache = {}
 
 
 def http_post(url, data_lines, return_data=False):
     _, _, host, path = url.split('/', 3)
     host, port = host.split(':')
-    addr = socket.getaddrinfo(host, port)[0][-1]
+    addr = addrinfo(host, port)
+
+    if addr is None:
+        return False
+
     s = socket.socket()
     s.connect(addr)
 
@@ -30,3 +37,27 @@ def http_post(url, data_lines, return_data=False):
 
     if return_data:
         return output
+
+
+def addrinfo(host, port):
+    try:
+        addrinfocache[host]
+    except KeyError:
+        try:
+            addrinfocache[host] = {
+                'timestamp': time.time(),
+                'addrinfo': socket.getaddrinfo(host, port)[0][-1]
+                }
+        except IndexError:
+            return None
+    else:
+        if (time.time() - addrinfocache[host]['timestamp']) > 3600:
+            try:
+                addrinfocache[host] = {
+                    'timestamp': time.time(),
+                    'addrinfo': socket.getaddrinfo(host, port)[0][-1]
+                    }
+            except IndexError:
+                return None
+
+    return addrinfocache[host]['addrinfo']

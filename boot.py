@@ -1,6 +1,7 @@
 import json
 import network
 import ntptime
+import time
 
 
 # CONNECT TO NETWORK
@@ -19,4 +20,8 @@ while not wlan.isconnected():
 try:
     ntptime.settime()
 except OSError:
-    ntptime.settime()
+    time.sleep(1)
+    try:
+        ntptime.settime()
+    except OSError:
+        pass

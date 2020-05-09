@@ -1,15 +1,16 @@
 import setup
 
+import etc
 from machine import Pin, I2C, reset
 from logging import INFO
 from ina219 import INA219
 import webserver
 import influxdb
 
-SHUNT_OHMS = 0.001
-
+# INA219
+ina219_settings = etc.get_config('ina219.json')
 i2c = I2C(-1, Pin(22), Pin(21))
-ina = INA219(SHUNT_OHMS, i2c, log_level=INFO)
+ina = INA219(ina219_settings['shunt_ohms'], i2c, log_level=INFO)
 ina.configure()
 
 

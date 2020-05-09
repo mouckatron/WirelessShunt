@@ -1,12 +1,10 @@
+import etc
 from httpclient import http_post
 import json
 import _thread
 import time
 
-settings = None
-with open('influxdb.json') as f:
-    settings = json.loads(f.read())
-
+settings = etc.get_config('influxdb.json')
 
 def create_dbs():
     for c in settings['connections']:

@@ -1,17 +1,14 @@
-import json
+import etc
 import network
 import ntptime
 import time
 
 
 # CONNECT TO NETWORK
-settings = None
-with open('wifi.json', 'r') as f:
-    settings = json.loads(f.read())
-
+wifi_settings = etc.get_config('wifi.json')
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
-wlan.connect(settings['SSID'], settings['password'])
+wlan.connect(wifi_settings['SSID'], wifi_settings['password'])
 
 while not wlan.isconnected():
     pass

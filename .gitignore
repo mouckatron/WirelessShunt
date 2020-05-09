@@ -134,3 +134,4 @@ dmypy.json
 # Secret config files
 wifi.json
 influxdb.json
+ina219.json

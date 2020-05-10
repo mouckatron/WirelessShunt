@@ -13,7 +13,10 @@ def http_post(url, data_lines, return_data=False):
         return False
 
     s = socket.socket()
-    s.connect(addr)
+    try:
+        s.connect(addr)
+    except OSError:
+        return False
 
     head = [
         'POST /%s HTTP/1.1' % path,

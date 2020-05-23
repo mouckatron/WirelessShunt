@@ -1,7 +1,10 @@
+import logging
 import socket
 import time
 
 addrinfocache = {}
+logging.basicConfig(level=logging.ERROR)
+log = logging.getLogger('HTTPClient')
 
 
 def http_post(url, data_lines, return_data=False):
@@ -12,7 +15,12 @@ def http_post(url, data_lines, return_data=False):
     if addr is None:
         return False
 
-    s = socket.socket()
+    try:
+        s = socket.socket()
+    except OSError as e:
+        # ENOBUFS
+        log.error(e)
+        return False
     try:
         s.connect(addr)
     except OSError:

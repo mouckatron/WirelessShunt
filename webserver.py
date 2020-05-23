@@ -1,7 +1,9 @@
 import json
+import logging
 import re
 import socket
 import _thread
+from time import sleep
 
 
 class Webserver():
@@ -10,13 +12,23 @@ class Webserver():
 
     def __init__(self, routes={}):
         self.routes = routes
+        self._log = logging.getLogger('WEB')
+        self.__bound = False
 
     def start(self):
         _thread.start_new_thread(self.run, ())
 
     def run(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind(('', 80))
+        while not self.__bound:
+            # somtimes during a soft reset, we cannot rebind the socket, keep trying
+            try:
+                s.bind(('', 80))
+                self.__bound = True
+            except OSError as e:
+                self._log.error(str(e))
+                sleep(1)
+
         s.listen(5)
 
         while True:
@@ -67,10 +79,11 @@ class Webserver():
         try:
             self.routes[path]
         except KeyError:
-            pass
+            self._log.error("Could not find route {}".format(path))
         else:
             return self.routes[path]
 
+        # What is this code doing? We probably would not get here.
         for r in self.routes:
             if path.find(r) > -1:
                 return self.routes[r]
@@ -105,8 +118,30 @@ class JSONAPI:
 
 class HTMLPage:
 
+    headers = [
+        'Content-Type: text/html'
+        ]
+
+    def __init__(self, template_filename, template_vars=None):
+        self.template_filename = template_filename
+        if template_vars is not None:
+            self.get_vars = template_vars
+
     def get_response(self):
         return self.response()
 
     def response(self):
-        return "<html><head><title>Hi!</title></head><body>Hi :) </body></html>"
+        try:
+            with open(self.template_filename, 'r') as f:
+                content = f.read()
+        except Exception as e:
+            print(e)
+        else:
+            try:
+                return content.format(**self.get_vars())
+            except KeyError as e:
+                print(e)
+                return str(e)
+
+    def get_vars(self):
+        return {}

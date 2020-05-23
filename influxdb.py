@@ -13,12 +13,22 @@ def create_dbs():
 
 
 def send_to_influxdb(ina):
-    for c in settings['connections']:
-        http_post('http://%s:%s/write?db=%s' % (c['host'], c['port'], c['db']), [
-                "bus_voltage,host=%s value=%.3f" % (settings['host'], ina.voltage()),
-                "current,host=%s value=%.3f" % (settings['host'], ina.current()),
-                "power,host=%s value=%.3f" % (settings['host'], ina.power())
-              ])
+    v, c, p = None, None, None
+    try:
+        v = ina.voltage()
+        c = ina.current()
+        p = ina.power()
+    except:
+        # in case we get an exception upstream
+        return
+
+    for conn in settings['connections']:
+        http_post('http://%s:%s/write?db=%s' % (conn['host'],
+                                                conn['port'],
+                                                conn['db']),
+                  ["bus_voltage,host=%s value=%.3f" % (settings['host'], v),
+                   "current,host=%s value=%.3f" % (settings['host'], c),
+                   "power,host=%s value=%.3f" % (settings['host'], p)])
 
 
 def start(ina):

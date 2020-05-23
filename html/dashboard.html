@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <title>Dashboard</title>
+    <meta http-equiv="refresh" content="60">
+    <style>
+      html {{
+        font-family: sans-serif;
+        font-size: 10px;
+      }}
+      footer {{
+        padding: 0.4em 0;
+        background-color: #afa;
+        border-radius: 6px;
+        text-align: center;
+      }}
+      .sysinfo {{
+        margin: 0 10px;
+      }}
+      .sysinfo:first {{
+        margin-left: 0;
+      }}
+      .sysinfo:last {{
+        margin-right: 0;
+      }}
+      .graph h3 {{
+        font-size: 200%;
+        padding: 4px 0;
+        background-color: #aaa;
+        text-align: center;
+        color: #fff;
+      }}
+      .graph svg {{
+          width: 75em;
+          height: 30em;
+      }}
+
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="graph">
+        <h3>Power</h3>
+        {power_graph}
+      </div>
+      <div class="graph">
+        <h3>Voltage</h3>
+        {voltage_graph}
+      </div>
+      <div class="graph">
+        <h3>Current</h3>
+        {current_graph}
+      </div>
+    </section>
+    <footer>
+      <span class="sysinfo">Mem: {free}</span>
+      <span class="sysinfo">Disk: {df}</span>
+    </footer>
+  </body>
+</html>

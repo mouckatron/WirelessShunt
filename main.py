@@ -1,24 +1,22 @@
 import setup
 
 import etc
-from machine import Pin, I2C, reset
-from logging import INFO
-from ina219 import INA219
+from machine import reset
+from ina219service import INA219Service
+from logging import DEBUG
 import webserver
 import influxdb
 
 # INA219
 ina219_settings = etc.get_config('ina219.json')
-i2c = I2C(-1, Pin(22), Pin(21))
-ina = INA219(ina219_settings['shunt_ohms'], i2c, log_level=INFO)
-ina.configure()
-
+inas = INA219Service(ina219_settings['shunt1'])
+inas.start()
 
 # WEBSERVER
 web_api = webserver.JSONAPI(lambda: {
-    'bus_voltage': '%.3f' % ina.voltage(),
-    'current': '%.3f' % ina.current(),
-    'power': '%.3f' % ina.power()
+    'bus_voltage': '%.3f' % inas.voltage(),
+    'current': '%.3f' % inas.current(),
+    'power': '%.3f' % inas.power()
     })
 web_reset = webserver.Empty(lambda: reset())
 
@@ -29,9 +27,9 @@ web = webserver.Webserver(routes={
 web.start()
 
 
-# INFLUXDB
+# influxdb
 influxdb.create_dbs()
-influxdb.start(ina)
+influxdb.start(inas)
 
 
 # def console_out(ina):

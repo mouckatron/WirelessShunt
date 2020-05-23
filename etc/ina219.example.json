@@ -1,3 +1,7 @@
 {
-    "shunt_ohms": 0.1
+    "shunt1": {
+        "name": "SolarShunt",
+        "address": 0,
+        "shunt_ohms": 0.05
+    }
 }

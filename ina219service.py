@@ -1,5 +1,5 @@
 
-from ina219 import INA219
+from ina219 import INA219, DeviceRangeError
 import logging
 from machine import Pin, I2C
 from utime import time
@@ -42,11 +42,19 @@ class INA219Service:
 
             while time() < nexttime:
 
-                latest_voltage.append(self._ina219.voltage())
-                current = self._ina219.current()
-                latest_current.append(current)
+                try:
+                    latest_voltage.append(self._ina219.voltage())
+                    current = self._ina219.current()
+                    latest_current.append(current)
+                except DeviceRangeError as e:
+                    self.__log.error(e)
+                    continue
 
-                power = self._ina219.power()
+                try:
+                    power = self._ina219.power()
+                except DeviceRangeError as e:
+                    self.__log.error(e)
+                    continue
                 if current < 0.0:
                     power = power * -1  # convert to negative
                 latest_power.append(power)
@@ -67,12 +75,15 @@ class INA219Service:
             self.cache_60sec = self.cache_60sec[1:]
 
         self.__log.debug("Updating cache")
-        self.cache_60sec.append((
-            timestamp,
-            sum(voltage) / len(voltage),
-            sum(current) / len(current),
-            sum(power) / len(power)
-            ))
+        try:
+            self.cache_60sec.append((
+                timestamp,
+                sum(voltage) / len(voltage),
+                sum(current) / len(current),
+                sum(power) / len(power)
+                ))
+        except ZeroDivisionError:
+            pass
 
     def voltage(self):
         """Get latest voltage value"""

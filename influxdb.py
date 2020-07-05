@@ -12,30 +12,37 @@ def create_dbs():
                   ['q=CREATE DATABASE %s' % c['db']])
 
 
-def send_to_influxdb(ina):
-    v, c, p = None, None, None
-    try:
-        v = ina.voltage()
-        c = ina.current()
-        p = ina.power()
-    except:
-        # in case we get an exception upstream
-        return
+class InfluxDBWriter:
+    """Send shunt data to InfluxDB"""
 
-    for conn in settings['connections']:
-        http_post('http://%s:%s/write?db=%s' % (conn['host'],
-                                                conn['port'],
-                                                conn['db']),
-                  ["bus_voltage,host=%s value=%.3f" % (settings['host'], v),
-                   "current,host=%s value=%.3f" % (settings['host'], c),
-                   "power,host=%s value=%.3f" % (settings['host'], p)])
+    def __init__(self, settings, sensor_service):
+        self.settings = settings
+        self.sensor_service = sensor_service
 
+    def start(self):
+        _thread.start_new_thread(self.run, ())
 
-def start(ina):
-    create_dbs()
-
-    def t(ina):
+    def run(self):
         while True:
-            send_to_influxdb(ina)
-            time.sleep(1)
-    _thread.start_new_thread(t, (ina,))
+            v, c, p = None, None, None
+            try:
+                v = self.sensor_service.voltage()
+                c = self.sensor_service.current()
+                p = self.sensor_service.power()
+
+            except:
+                # in case we get an exception upstream
+                time.sleep(1)
+                continue
+
+            msg = ["bus_voltage,host=%s,sensor=%s value=%.3f" %
+                   (settings['host'], self.sensor_service.name, v),
+                   "current,host=%s,sensor=%s value=%.3f" %
+                   (settings['host'], self.sensor_service.name, c),
+                   "power,host=%s,sensor=%s value=%.3f" %
+                   (settings['host'], self.sensor_service.name, p)]
+            for conn in settings['connections']:
+                http_post('http://%s:%s/write?db=%s' % (conn['host'],
+                                                        conn['port'],
+                                                        conn['db']),
+                          msg)

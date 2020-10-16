@@ -1,1 +1,4 @@
-{"SSID":"MyHomeNetwork","password":"MyPassword"}
+[
+    {"SSID":"MyHomeNetwork","password":"MyPassword"},
+    {"SSID":"AnotherNetwork","password":"OtherPassword"}
+]

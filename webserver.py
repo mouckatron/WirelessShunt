@@ -1,5 +1,6 @@
 import json
 import logging
+import logging.influxhandler
 import re
 import socket
 import _thread
@@ -13,6 +14,8 @@ class Webserver():
     def __init__(self, routes={}):
         self.routes = routes
         self._log = logging.getLogger('WEB')
+        self._log.setLevel(logging.ERROR)
+        self._log.addHandler(logging.influxhandler.InfluxDBHandler())
         self.__bound = False
 
     def start(self):

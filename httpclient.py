@@ -3,9 +3,8 @@ import socket
 import time
 
 addrinfocache = {}
-logging.basicConfig(level=logging.ERROR)
 log = logging.getLogger('HTTPClient')
-
+log.setLevel(logging.ERROR)
 
 def http_post(url, data_lines, return_data=False):
     _, _, host, path = url.split('/', 3)
@@ -19,7 +18,6 @@ def http_post(url, data_lines, return_data=False):
         s = socket.socket()
     except OSError as e:
         # ENOBUFS
-        log.error(e)
         return False
     try:
         s.connect(addr)

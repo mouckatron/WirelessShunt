@@ -1,6 +1,7 @@
 
 from ina219 import INA219, DeviceRangeError
 import logging
+import logging.influxhandler
 from machine import Pin, I2C
 from utime import time
 import _thread
@@ -14,8 +15,9 @@ class INA219Service:
 
     def __init__(self, settings, log_level=logging.INFO):
         self.name = settings['name']
-        logging.basicConfig(level=log_level)
         self.__log = logging.getLogger('INA219Service')
+        self.__log.setLevel(log_level)
+        self.__log.addHandler(logging.influxhandler.InfluxDBHandler())
         self._i2c = I2C(-1, Pin(22), Pin(21))
         self._ina219 = INA219(settings['shunt_ohms'],
                               self._i2c,

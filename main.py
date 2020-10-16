@@ -3,11 +3,15 @@ import setup
 import etc
 import machine
 from ina219service import INA219Service
-from logging import DEBUG
+import logging
+import logging.influxhandler
 import webserver
 import influxdb
 import systemutils
 import svgchart
+
+# Logging
+logging.getLogger().setLevel(logging.INFO)
 
 # Initial WEB
 web_routes = {}

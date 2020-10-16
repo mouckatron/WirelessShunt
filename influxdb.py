@@ -46,3 +46,4 @@ class InfluxDBWriter:
                                                         conn['port'],
                                                         conn['db']),
                           msg)
+            time.sleep(1)

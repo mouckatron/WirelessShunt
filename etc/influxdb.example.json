@@ -1,5 +1,10 @@
 {
-    "host":"192.168.1.1",
-    "port": 8086,
-    "db": "PowerShunt"
+    "connections": [
+        {
+            "host":"192.168.1.1",
+            "port": 8086,
+            "db": "PowerShunt"
+        }
+    ],
+    "host": "MyWirelessShunt"
 }
